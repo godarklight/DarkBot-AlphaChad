@@ -10,30 +10,41 @@ namespace DarkBot_AlphaChad
     public class AlphaChad : BotModule
     {
         private DiscordSocketClient _client = null;
+        private string findMessage = "I know this is annoying";
         private string replyMessage = "Cucked!";
 
-        public async Task Initialize(IServiceProvider service)
+        public Task Initialize(IServiceProvider service)
         {
             _client = service.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
             _client.MessageReceived += HandleMessage;
+            return Task.CompletedTask;
         }
 
-        public async Task HandleMessage(SocketMessage message)
+        private Task HandleMessage(SocketMessage message)
         {
             SocketUserMessage sum = message as SocketUserMessage;
             if (sum == null)
             {
-                return;
+                return Task.CompletedTask;
             }
             SocketTextChannel stc = sum.Channel as SocketTextChannel;
             if (stc == null)
             {
-                return;
+                return Task.CompletedTask;
             }
-            if (sum.Author.Id == 418412306981191680)
+            if (sum.Author.Id == 418412306981191680 && sum.Embeds != null)
             {
-                if (sum.Content.Contains("Have I done well today?"))
+                bool deleteThisMessage = false;
+                foreach (IEmbed e in sum.Embeds)
                 {
+                    if (e != null && e.Description.Contains(findMessage))
+                    {
+                        deleteThisMessage = true;
+                    }
+                }
+                if (deleteThisMessage)
+                {
+                    Log(LogSeverity.Info, "Cucking BMO");
                     ReplyMessage(sum, stc);
                 }
             }
@@ -41,22 +52,29 @@ namespace DarkBot_AlphaChad
             {
                 if (sum.Content == replyMessage)
                 {
+                    Log(LogSeverity.Info, "Removing own message");
                     DeleteMessage(sum, stc);
                 }
             }
-
+            return Task.CompletedTask;
         }
 
-        public async Task ReplyMessage(SocketUserMessage sum, SocketTextChannel stc)
+        private void Log(LogSeverity severity, string text)
         {
-            sum.DeleteAsync();
-            Task<RestUserMessage> rum = stc.SendMessageAsync(replyMessage);
+            LogMessage logMessage = new LogMessage(severity, "AlphaChad", text);
+            Program.LogAsync(logMessage);
         }
 
-        public async Task DeleteMessage(SocketUserMessage sum, SocketTextChannel stc)
+        private async void ReplyMessage(SocketUserMessage sum, SocketTextChannel stc)
+        {
+            await sum.DeleteAsync();
+            await stc.SendMessageAsync(replyMessage);
+        }
+
+        private async void DeleteMessage(SocketUserMessage sum, SocketTextChannel stc)
         {
             await Task.Delay(5000);
-            sum.DeleteAsync();
+            await sum.DeleteAsync();
         }
     }
 }
