@@ -60,7 +60,7 @@ namespace DarkBot_AlphaChad
                 bool deleteThisMessage = false;
                 foreach (IEmbed e in message.Embeds)
                 {
-                    if (e != null && e.Description.Contains(findMessage))
+                    if (e != null && e.Description != null && e.Description.Contains(findMessage))
                     {
                         deleteThisMessage = true;
                     }
