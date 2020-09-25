@@ -16,26 +16,51 @@ namespace DarkBot_AlphaChad
         public Task Initialize(IServiceProvider service)
         {
             _client = service.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
+            //_client.Ready += OnReady;
             _client.MessageReceived += HandleMessage;
             return Task.CompletedTask;
         }
 
-        private Task HandleMessage(SocketMessage message)
+        /*
+        private async Task OnReady()
         {
-            SocketUserMessage sum = message as SocketUserMessage;
-            if (sum == null)
+            Log(LogSeverity.Info, "AlphaChad ready!");
+            SocketTextChannel channel = _client.GetChannel(460296473079185411UL) as SocketTextChannel;
+            IMessage message = await channel.GetMessageAsync(758866321735417899UL);
+            CheckMessage(message, channel);
+        }
+        */
+
+        private Task HandleMessage(SocketMessage socketMessage)
+        {
+            SocketUserMessage message = socketMessage as SocketUserMessage;
+            if (message == null)
             {
                 return Task.CompletedTask;
             }
-            SocketTextChannel stc = sum.Channel as SocketTextChannel;
-            if (stc == null)
+            SocketTextChannel channel = message.Channel as SocketTextChannel;
+            if (channel == null)
             {
                 return Task.CompletedTask;
             }
-            if (sum.Author.Id == 418412306981191680 && sum.Embeds != null)
+            CheckMessage(message, channel);
+            if (message.Author.Id == _client.CurrentUser.Id)
+            {
+                if (message.Content == replyMessage)
+                {
+                    Log(LogSeverity.Info, "Removing own message");
+                    DeleteMessage(message, channel);
+                }
+            }
+            return Task.CompletedTask;
+        }
+
+        private void CheckMessage(IMessage message, SocketTextChannel stc)
+        {
+            if (message.Author.Id == 418412306981191680 && message.Embeds != null)
             {
                 bool deleteThisMessage = false;
-                foreach (IEmbed e in sum.Embeds)
+                foreach (IEmbed e in message.Embeds)
                 {
                     if (e != null && e.Description.Contains(findMessage))
                     {
@@ -45,18 +70,9 @@ namespace DarkBot_AlphaChad
                 if (deleteThisMessage)
                 {
                     Log(LogSeverity.Info, "Cucking BMO");
-                    ReplyMessage(sum, stc);
+                    ReplyMessage(message, stc);
                 }
             }
-            if (sum.Author.Id == _client.CurrentUser.Id)
-            {
-                if (sum.Content == replyMessage)
-                {
-                    Log(LogSeverity.Info, "Removing own message");
-                    DeleteMessage(sum, stc);
-                }
-            }
-            return Task.CompletedTask;
         }
 
         private void Log(LogSeverity severity, string text)
@@ -65,16 +81,16 @@ namespace DarkBot_AlphaChad
             Program.LogAsync(logMessage);
         }
 
-        private async void ReplyMessage(SocketUserMessage sum, SocketTextChannel stc)
+        private async void ReplyMessage(IMessage message, SocketTextChannel channel)
         {
-            await sum.DeleteAsync();
-            await stc.SendMessageAsync(replyMessage);
+            await message.DeleteAsync();
+            await channel.SendMessageAsync(replyMessage);
         }
 
-        private async void DeleteMessage(SocketUserMessage sum, SocketTextChannel stc)
+        private async void DeleteMessage(IMessage message, SocketTextChannel channel)
         {
             await Task.Delay(5000);
-            await sum.DeleteAsync();
+            await message.DeleteAsync();
         }
     }
 }
