@@ -12,24 +12,21 @@ namespace DarkBot_AlphaChad
         private DiscordSocketClient _client = null;
         private string findMessage = "I know this is annoying";
         private string replyMessage = "Cucked!";
+        private string[] pings = { "hi", "hello", "hey", "ping" };
 
         public Task Initialize(IServiceProvider service)
         {
             _client = service.GetService(typeof(DiscordSocketClient)) as DiscordSocketClient;
-            //_client.Ready += OnReady;
+            _client.Ready += OnReady;
             _client.MessageReceived += HandleMessage;
             return Task.CompletedTask;
         }
 
-        /*
-        private async Task OnReady()
+        private Task OnReady()
         {
             Log(LogSeverity.Info, "AlphaChad ready!");
-            SocketTextChannel channel = _client.GetChannel(460296473079185411UL) as SocketTextChannel;
-            IMessage message = await channel.GetMessageAsync(758866321735417899UL);
-            CheckMessage(message, channel);
+            return Task.CompletedTask;
         }
-        */
 
         private Task HandleMessage(SocketMessage socketMessage)
         {
@@ -44,6 +41,7 @@ namespace DarkBot_AlphaChad
                 return Task.CompletedTask;
             }
             CheckMessage(message, channel);
+            CheckPing(message, channel);
             if (message.Author.Id == _client.CurrentUser.Id)
             {
                 if (message.Content == replyMessage)
@@ -55,7 +53,7 @@ namespace DarkBot_AlphaChad
             return Task.CompletedTask;
         }
 
-        private void CheckMessage(IMessage message, SocketTextChannel stc)
+        private void CheckMessage(IMessage message, SocketTextChannel channel)
         {
             if (message.Author.Id == 418412306981191680 && message.Embeds != null)
             {
@@ -70,8 +68,41 @@ namespace DarkBot_AlphaChad
                 if (deleteThisMessage)
                 {
                     Log(LogSeverity.Info, "Cucking BMO");
-                    ReplyMessage(message, stc);
+                    ReplyMessage(message, channel);
                 }
+            }
+        }
+
+        private void CheckPing(IMessage message, SocketTextChannel channel)
+        {
+            bool mentionsUs = false;
+            foreach (ulong user in message.MentionedUserIds)
+            {
+                if (user == _client.CurrentUser.Id)
+                {
+                    mentionsUs = true;
+                }
+            }
+            if (!mentionsUs)
+            {
+                return;
+            }
+            bool isPing = false;
+            if (message.Content != null)
+            {
+                string lowerText = message.Content.ToLower();
+                foreach (string testString in pings)
+                {
+                    if (lowerText.Contains(testString))
+                    {
+                        isPing = true;
+                    }
+                }
+
+            }
+            if (isPing)
+            {
+                channel.SendMessageAsync("Yo!");
             }
         }
 
