@@ -55,7 +55,16 @@ namespace DarkBot_AlphaChad
 
         private void CheckMessage(IMessage message, SocketTextChannel channel)
         {
-            if (message.Author.Id == 418412306981191680 && message.Embeds != null)
+            if (message.Author.Id != 418412306981191680)
+            {
+                return;
+            }
+            if (message.Content != null && message.Content.Contains("I'm vewy sowwy about cwashing"))
+            {
+                Log(LogSeverity.Info, "Cucking BMO - Crashed");
+                channel.SendMessageAsync("You're pathetic BMO. I'm coming over to fuck your wife now.");
+            }
+            if (message.Embeds != null)
             {
                 bool deleteThisMessage = false;
                 foreach (IEmbed e in message.Embeds)
