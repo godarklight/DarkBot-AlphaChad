@@ -4,10 +4,10 @@
     <ProjectReference Include="..\DarkBot\DarkBot.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Discord.Net" Version="2.2.0" />
+    <PackageReference Include="Discord.Net" Version="2.3.0" />
   </ItemGroup>
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>DarkBot_AlphaChad</RootNamespace>
   </PropertyGroup>
 </Project>
