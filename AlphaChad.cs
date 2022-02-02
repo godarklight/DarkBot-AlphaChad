@@ -24,10 +24,6 @@ namespace DarkBot_AlphaChad
 
         private async Task OnReady()
         {
-            foreach (SocketGuild guild in _client.Guilds)
-            {
-                Log(LogSeverity.Info, $"Guild: {guild.Name}");
-            }
             await SetupCommands();
             Log(LogSeverity.Info, "AlphaChad ready!");
         }
